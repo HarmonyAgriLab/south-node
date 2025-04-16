@@ -9,11 +9,15 @@ south-node/
 ├── hi3863-nb-mesh/      # mesh版本代码
 ~~~
 
-## 2 hi3863-nb-nomesh版本部署
+## 2 环境配置
+
+本项目的开发在WSL上，关于WSL子系统的环境配置请看文档[WSL子系统开发环境搭建](environment/WSL子系统开发环境搭建.md)，在参考这个文档成功配置好WSL的环境后，请参考这个文档配置SDK的编译开发环境[WSL子系统编译及烧录](environment/WSL子系统编译及烧录.md)。
+
+## 3 hi3863-nb-nomesh版本部署
 
 详情请参考[hi3863-nb-nomesh README 中的部署说明](hi3863-nb-nomesh/README.md)
 
-## 3 hi3863-nb-mesh版本部署
+## 4 hi3863-nb-mesh版本部署
 
 详情请参考[hi3863-nb-mesh README 中的部署说明](hi3863-nb-mesh/README.md)
 
