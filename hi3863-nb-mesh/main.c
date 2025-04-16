@@ -56,6 +56,7 @@
 #define I2C_SET_BANDRATE 400000        // I2C波特率
 
 #define NB_DETECT_CNT 60     // 周期性检测NB模块是否具有上报能力（可能出现信号不好、流量卡没流量、NB模块损坏等情况）
+#define SOIL_DETECT_CNT 60   // 如果土壤传感器多次无法收到正确数据，认为Soil模块不可用
 #define COLLECT_DATA_CNT 5   // 数据采集周期，以秒为单位
 
 static float air_temp = 0, air_humi = 0;                                 // 空气温度和湿度
@@ -70,11 +71,12 @@ uint8_t soil_rx_buff[SOFT_UART_TRANSFER_SIZE] = { 0 };                          
 uint8_t nb_tx_buff[UART_TRANSFER_SIZE] = { 0 };                                 // NB发送缓冲区
 uint8_t nb_rx_buff[UART_TRANSFER_SIZE] = { 0 };                                 // NB接收缓冲区
 
-int8_t aht20_flag = 0;      // 温湿度传感器可用标识
-int8_t soil_flag = 0;       // 土壤传感器可用标识
-int8_t nb_flag = 0;         // NB模块可用标识
-int8_t nb_send_flag = 0;    // NB是否正在进行发送
-int8_t nb_detect_cnt = 0;   // NB周期检测能力标识
+int8_t aht20_flag = 0;        // 温湿度传感器可用标识
+int8_t soil_flag = 0;         // 土壤传感器可用标识
+int8_t soil_detect_cnt = 0;   // 土壤传感器周期检测能力标识
+int8_t nb_flag = 0;           // NB模块可用标识
+int8_t nb_send_flag = 0;      // NB是否正在进行发送
+int8_t nb_detect_cnt = 0;     // NB周期检测能力标识
 
 int8_t is_soft_mesh_init = 0;   // softmesh网络是否完成初始化
 
@@ -148,6 +150,7 @@ void Soil_StartMeasure(void)   //! 测量并解析土壤数据
         {
             if (Check_Crc(soil_rx_buff, sizeof(soil_rx_buff)))   // 检查CRC校验
             {
+                soil_flag = 1;
                 // 解析接收到的土壤传感器数据
                 uint16_t moisture = (soil_rx_buff[3] << 8) | soil_rx_buff[4];       // 湿度值
                 uint16_t temperature = (soil_rx_buff[5] << 8) | soil_rx_buff[6];    // 温度值
@@ -163,6 +166,33 @@ void Soil_StartMeasure(void)   //! 测量并解析土壤数据
                 phosphorus = (soil_rx_buff[13] << 8) | soil_rx_buff[14];   // 磷含量
                 potassium = (soil_rx_buff[15] << 8) | soil_rx_buff[16];    // 钾含量
             }
+            else
+            {
+                soil_detect_cnt++;
+                if (soil_detect_cnt == SOIL_DETECT_CNT)
+                {
+                    soil_flag = 0;
+                    soil_detect_cnt = 0;
+                }
+            }
+        }
+        else
+        {
+            soil_detect_cnt++;
+            if (soil_detect_cnt == SOIL_DETECT_CNT)
+            {
+                soil_flag = 0;
+                soil_detect_cnt = 0;
+            }
+        }
+    }
+    else
+    {
+        soil_detect_cnt++;
+        if (soil_detect_cnt == SOIL_DETECT_CNT)
+        {
+            soil_flag = 0;
+            soil_detect_cnt = 0;
         }
     }
 }
@@ -356,7 +386,7 @@ static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与
         }
 
         // 组装空气数据报文
-        int len = sprintf(pub_payload_air, "{\"MAC\":\"%02x-%02x-%02x-%02x-%02x-%02x\",\"params\":{\"air_temp\":%.1f,\"air_humi\":%.1f}}\r\n", (unsigned char)mac_address[0], (unsigned char)mac_address[1], (unsigned char)mac_address[2], (unsigned char)mac_address[3], (unsigned char)mac_address[4], (unsigned char)mac_address[5], air_temp, air_humi);
+        int len = sprintf(pub_payload_air, "{\"MAC\":\"%02x-%02x-%02x-%02x-%02x-%02x\",\"params\":{\"air_temp\":%.1f,\"air_humi\":%.1f}}\r\n", (unsigned char)mac_address[0], (unsigned char)mac_address[1], (unsigned char)mac_address[2], (unsigned char)mac_address[3], (unsigned char)mac_address[4], (unsigned char)mac_address[5], aht20_flag ? air_temp : -1000.0, aht20_flag ? air_humi : -1000.0);
         printf("[%s] Air Data Payload: %s", __func__, pub_payload_air);   // 打印空气数据报文
         if (nb_flag)
             NB_Upload_Air_Data(pub_payload_air, len);   // 上传空气数据
@@ -373,13 +403,13 @@ static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与
                       (unsigned char)mac_address[3],
                       (unsigned char)mac_address[4],
                       (unsigned char)mac_address[5],
-                      moisture_value,
-                      (double)temperature_value,
-                      conductivity_value,
-                      ph_value,
-                      nitrogen,
-                      phosphorus,
-                      potassium);
+                      soil_flag ? moisture_value : -1000,
+                      soil_flag ? (double)temperature_value : -1000,
+                      soil_flag ? conductivity_value : -1000,
+                      soil_flag ? ph_value : -1000,
+                      soil_flag ? nitrogen : -1000,
+                      soil_flag ? phosphorus : -1000,
+                      soil_flag ? potassium : -1000);
         printf("[%s] Soil Data Payload: %s", __func__, pub_payload_soil);   // 打印土壤数据报文
         if (nb_flag)
             NB_Upload_Soil_Data(pub_payload_soil, len);   // 上传土壤数据
