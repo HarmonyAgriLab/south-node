@@ -13,6 +13,7 @@
 ## 3 拉取项目代码
 
 ```shell
+git clone git@github.com:HarmonyAgriLab/south-node.git
 ```
 
 ## 4 部署代码
@@ -61,7 +62,29 @@ python3 build.py ws63-liteos-app
 
 ## 5 硬件接线
 
+请按照如下引脚分配表和供电要求表连接线路：
 
+### 引脚分配
+
+| GPIO引脚 | 复用功能      | 用途            |
+| -------- | ------------- | --------------- |
+| GPIO_17  | UART0_TXD     | 烧录和debug串口 |
+| GPIO_18  | UART0_RXD     | 烧录和debug串口 |
+| GPIO_15  | I2C_SCL       | AHT20           |
+| GPIO_16  | I2C_SDA       | AHT20           |
+| GPIO_07  | UART2_RXD     | NB模组          |
+| GPIO_08  | UART2_TXD     | NB模组          |
+| GPIO_11  | SOFT_UART_TXD | 土壤传感器      |
+| GPIO_12  | SOFT_UART_RXD | 土壤传感器      |
+
+### 供电要求
+
+| 设备           | 电压    | 是否需要接地 |
+| -------------- | ------- | ------------ |
+| AHT20          | 3.3/5 V | 需要         |
+| 土壤传感器     | 5 V     | 需要         |
+| TTL485转换模块 | 3.3 V   | 需要         |
+| NB模组         | 5 V     | 需要         |
 
 ## 6 烧录程序
 
@@ -71,8 +94,8 @@ python3 build.py ws63-liteos-app
 
 按下复位键启动程序，连接开发板串口，可见串口打印的上传报文数据。
 
-![image-20250416203244615](README.assets/image-20250416203244615.png)
+![image-20250416211638402](README.assets/image-20250416211638402.png)
 
 在MQTT服务器可见节点上传的测量数据报文，这里通过MQTTX客户端订阅主题进行查看。
 
-![image-20250416203303038](README.assets/image-20250416203303038.png)
+![image-20250416211646859](README.assets/image-20250416211646859.png)
