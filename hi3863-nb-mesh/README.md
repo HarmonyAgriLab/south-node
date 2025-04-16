@@ -4,11 +4,11 @@
 
 ## 1 搭建环境
 
-请参照[WSL子系统开发环境搭建](../environment/WSL子系统编译及烧录.md")完成开发环境的搭建。
+请参照[WSL子系统开发环境搭建](../environment/WSL_Build_and_Burn.md")完成开发环境的搭建。
 
 ## 2 编译代码
 
-请参照[WSL子系统开发环境搭建](../environment/WSL子系统开发环境搭建.md")完成代码的拉取、编译和烧录。
+请参照[WSL子系统开发环境搭建](../environment/WSL_Develop_Env.md")完成代码的拉取、编译和烧录。
 
 ## 3 拉取项目代码
 
