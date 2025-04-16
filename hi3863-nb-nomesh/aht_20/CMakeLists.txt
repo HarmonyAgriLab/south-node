@@ -1,4 +1,0 @@
-set(SOURCES 
-        "${SOURCES}" 
-        "${CMAKE_CURRENT_SOURCE_DIR}/aht_20.c"
-PARENT_SCOPE)
