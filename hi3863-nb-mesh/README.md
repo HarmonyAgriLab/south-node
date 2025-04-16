@@ -96,6 +96,6 @@ python3 build.py ws63-liteos-app
 
 ![image-20250416211638402](README.assets/image-20250416211638402.png)
 
-在MQTT服务器可见节点上传的测量数据报文，这里通过MQTTX客户端订阅主题进行查看。
+在MQTT服务器可见节点上传的测量数据报文，这里通过[MQTTX：全功能 MQTT 客户端工具](https://mqttx.app/zh)订阅主题进行查看，对应的连接账号由服务器端提供。
 
 ![image-20250416211646859](README.assets/image-20250416211646859.png)
