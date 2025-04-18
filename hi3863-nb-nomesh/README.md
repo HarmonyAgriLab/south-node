@@ -4,11 +4,11 @@
 
 ## 1 搭建环境
 
-请参照[WSL子系统开发环境搭建](../environment/WSL_Build_and_Burn.md")完成开发环境的搭建。
+请参照[WSL子系统开发环境搭建](../environment/WSL_Build_and_Burn.md)完成开发环境的搭建。
 
 ## 2 编译代码
 
-请参照[WSL子系统开发环境搭建](../environment/WSL_Develop_Env.md")完成代码的拉取、编译和烧录。
+请参照[Hi3863编译及烧录教程](../environment/WSL_Develop_Env.md)完成代码的拉取、编译和烧录。
 
 ## 3 拉取项目代码
 
@@ -18,11 +18,11 @@ git clone git@github.com:HarmonyAgriLab/south-node.git
 
 ## 4 部署代码
 
-将`environment/hi3863-nb-nomesh`文件夹复制到`fbb_ws63/src/application/samples/`路径下。
+将 `environment/hi3863-nb-nomesh`文件夹复制到 `fbb_ws63/src/application/samples/`路径下。
 
 ![image-20250416195508100](README.assets/image-20250416195508100.png)
 
-在`fbb_ws63/src/application/samples/CMakeLists.txt`文件末尾添加如下代码：
+在 `fbb_ws63/src/application/samples/CMakeLists.txt`文件末尾添加如下代码：
 
 ```cmake
 if(DEFINED CONFIG_ENABLE_HI3861_NB_NOMESH_SAMPLE)
@@ -30,7 +30,7 @@ if(DEFINED CONFIG_ENABLE_HI3861_NB_NOMESH_SAMPLE)
 endif()
 ```
 
-在`fbb_ws63/src/application/samples/Kconfig`文件末尾添加如下代码：
+在 `fbb_ws63/src/application/samples/Kconfig`文件末尾添加如下代码：
 
 ```cmake
 config ENABLE_HI3861_NB_NOMESH_SAMPLE
@@ -42,17 +42,17 @@ config ENABLE_HI3861_NB_NOMESH_SAMPLE
         This option means enable the sample of hi3863-nb-nomesh.
 ```
 
-在`fbb_ws63/src`路径下执行如下命令，启动 Menuconfig 程序：
+在 `fbb_ws63/src`路径下执行如下命令，启动 Menuconfig 程序：
 
 ```shell
 python3 build.py -c ws63-liteos-app menuconfig
 ```
 
-选择需要编译的`HI3861_NB_MESH`目标，勾选并保存退出：
+选择需要编译的 `HI3861_NB_MESH`目标，勾选并保存退出：
 
 ![image-20250416203535319](README.assets/image-20250416203535319.png)
 
-在`fbb_ws63/src`路径下执行如下命令，启动编译：
+在 `fbb_ws63/src`路径下执行如下命令，启动编译：
 
 ```shell
 python3 build.py ws63-liteos-app
@@ -88,7 +88,7 @@ python3 build.py ws63-liteos-app
 
 ## 6 烧录程序
 
-请参照[WSL子系统开发环境搭建](../environment/WSL子系统开发环境搭建.md")完成代码的烧录。
+请参照[Hi3863编译及烧录教程](../environment/WSL_Develop_Env.md)完成烧录。
 
 ## 7 启动程序
 
