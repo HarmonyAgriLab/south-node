@@ -277,6 +277,11 @@ void NB_Init(void)   //! NB初始化
     (void)uapi_watchdog_kick();   // 触发看门狗
     osal_mdelay(500);
 
+    // 软复位NB模组
+    unsigned char ATCommand0[] = "AT+NRB\r\n";
+    uapi_uart_write(CONFIG_UART2_BUS_ID, ATCommand0, sizeof(ATCommand0), 0);
+    osal_mdelay(3000);
+
     if (!NB_Detect())
         return;
 
