@@ -78,6 +78,34 @@ char client_id[25] = { 0 };
 char pub_payload_air[100] = { 0 };    // 空气数据报文
 char pub_payload_soil[200] = { 0 };   // 土壤数据报文
 
+#define RELAY_TIMER_INDEX       1       // 使用TIMER1
+#define RELAY_TIMER_PRIO        1       // 定时器优先级
+#define RELAY_TIMER_IRQN        TIMER_1_IRQN
+
+typedef enum {
+    RELAY_STATE_IDLE = 0,
+    RELAY_STATE_WORKING,
+    RELAY_STATE_TIMEOUT
+} relay_state_t;
+
+typedef struct {
+    timer_handle_t timer;
+    relay_state_t state;
+    uint32_t duration_ms;
+} relay_control_t;
+
+static relay_control_t g_relay1_ctrl = {0};
+static relay_control_t g_relay2_ctrl = {0};
+
+static void relay_timeout_callback(uintptr_t data)
+{
+    relay_control_t *ctrl = (relay_control_t *)data;
+    
+    if (ctrl->state == RELAY_STATE_WORKING) {
+        ctrl->state = RELAY_STATE_TIMEOUT;
+    }
+}
+
 int Check_Crc(uint8_t* data, uint16_t length)   //! CRC-16-MODBUS校验函数
 {
     uint16_t crc = 0xFFFF;   // 初始CRC值
@@ -402,18 +430,25 @@ void parse_qmtrecv(const char* input)
         printf("topic = %s\n", topic);
         printf("qos = %d\n", qos);
         printf("payload = %d\n", payload_value);
-        if(payload_value==0){
+        if(payload_value == 0){
+            // 启动RELAY1并设置定时
             uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_HIGH);
             uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
-            osal_mdelay(130000);
-            uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
-            uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
-        }else if(payload_value==1){
+            
+            g_relay1_ctrl.duration_ms = 13000; // 13秒
+            g_relay1_ctrl.state = RELAY_STATE_WORKING;
+            uapi_timer_start(g_relay1_ctrl.timer, g_relay1_ctrl.duration_ms * 1000, 
+                            relay_timeout_callback, (uintptr_t)&g_relay1_ctrl);
+            
+        } else if(payload_value == 1){
+            // 启动RELAY2并设置定时
             uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_HIGH);
             uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
-            osal_mdelay(130000);
-            uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
-            uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
+            
+            g_relay2_ctrl.duration_ms = 13000; // 13秒
+            g_relay2_ctrl.state = RELAY_STATE_WORKING;
+            uapi_timer_start(g_relay2_ctrl.timer, g_relay2_ctrl.duration_ms * 1000,
+                            relay_timeout_callback, (uintptr_t)&g_relay2_ctrl);
         }
     } else {
         printf("解析失败，返回值 = %d\n", ret);
@@ -432,12 +467,25 @@ void debug_print_raw(const uint8_t* buf, int len)
 
 void Relay_Init(void)
 {
+    // 初始化GPIO
     uapi_pin_set_mode(RELAY1_GPIO, HAL_PIO_FUNC_GPIO);
     uapi_gpio_set_dir(RELAY1_GPIO, GPIO_DIRECTION_OUTPUT);
     uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
+    
     uapi_pin_set_mode(RELAY2_GPIO, HAL_PIO_FUNC_GPIO);
     uapi_gpio_set_dir(RELAY2_GPIO, GPIO_DIRECTION_OUTPUT);
     uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
+
+    // 初始化定时器
+    uapi_timer_init();
+    uapi_timer_adapter(RELAY_TIMER_INDEX, RELAY_TIMER_IRQN, RELAY_TIMER_PRIO);
+    
+    // 创建定时器
+    uapi_timer_create(RELAY_TIMER_INDEX, &g_relay1_ctrl.timer);
+    uapi_timer_create(RELAY_TIMER_INDEX, &g_relay2_ctrl.timer);
+    
+    g_relay1_ctrl.state = RELAY_STATE_IDLE;
+    g_relay2_ctrl.state = RELAY_STATE_IDLE;
 }
 
 static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与上报功能
@@ -455,6 +503,22 @@ static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与
     while (1)
     {
         osal_msleep(COLLECT_DATA_CNT * 1000);   // 这里设置采集周期，休眠时间执行softmesh
+        // 检查RELAY1定时器
+        if (g_relay1_ctrl.state == RELAY_STATE_TIMEOUT) {
+            uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
+            uapi_timer_stop(g_relay1_ctrl.timer);
+            g_relay1_ctrl.state = RELAY_STATE_IDLE;
+            printf("已经重置Relay1引脚");
+        }
+        
+        // 检查RELAY2定时器
+        if (g_relay2_ctrl.state == RELAY_STATE_TIMEOUT) {
+            uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
+            uapi_timer_stop(g_relay2_ctrl.timer);
+            g_relay2_ctrl.state = RELAY_STATE_IDLE;
+            printf("已经重置Relay2引脚");
+        }
+
         memset(rec_buff, 0, 100);                                                    // 清零
         int len = uapi_uart_read(CONFIG_UART2_BUS_ID, rec_buff, 100, 0);             // 读取内容
         osal_mdelay(200);

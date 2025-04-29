@@ -47,7 +47,8 @@
 #define CONFIG_UART2_BUS_ID 2        // UART2的总线ID
 #define CONFIG_UART_INT_WAIT_MS 5    // UART中断等待时间
 
-#define RELAY_GPIO 15                // 继电器引脚
+#define RELAY1_GPIO 15                // 继电器1引脚
+#define RELAY2_GPIO 16                // 继电器2引脚
 
 #define NB_DETECT_CNT 60     // 周期性检测NB模块是否具有上报能力（可能出现信号不好、流量卡没流量、NB模块损坏等情况）
 #define SOIL_DETECT_CNT 60   // 如果土壤传感器多次无法收到正确数据，认为Soil模块不可用
@@ -256,7 +257,8 @@ void NB_QMTOPEN(void){
 }
 
 void NB_QMTCONN(void){
-    unsigned char ATCommand0[] = "AT+QMTCONN=0,\"%s\",\"user\",\"Sztu1034\"\r\n";// 设置AT指令
+    unsigned char ATCommand0[60] = { 0 };
+    sprintf((char*)ATCommand0, "AT+QMTCONN=0,\"%s\",\"user\",\"Sztu1034\"\r\n", client_id);// 设置AT指令
     uapi_uart_write(CONFIG_UART2_BUS_ID, ATCommand0, sizeof(ATCommand0), 0);     // 串口发送指令
     printf("发送NB:\n%s\n",ATCommand0);                                          // 打印发送的内容
     osal_mdelay(2000);                                                            // 延时等待重启
@@ -401,9 +403,9 @@ void parse_qmtrecv(const char* input)
         printf("qos = %d\n", qos);
         printf("payload = %d\n", payload_value);
         if(payload_value==0){
-            uapi_gpio_set_val(RELAY_GPIO, GPIO_LEVEL_HIGH);
+            uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_HIGH);
         }else if(payload_value==1){
-            uapi_gpio_set_val(RELAY_GPIO, GPIO_LEVEL_LOW);
+            uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
         }
     } else {
         printf("解析失败，返回值 = %d\n", ret);
@@ -422,9 +424,12 @@ void debug_print_raw(const uint8_t* buf, int len)
 
 void Relay_Init(void)
 {
-    uapi_pin_set_mode(RELAY_GPIO, HAL_PIO_FUNC_GPIO);
-    uapi_gpio_set_dir(RELAY_GPIO, GPIO_DIRECTION_OUTPUT);
-    uapi_gpio_set_val(RELAY_GPIO, GPIO_LEVEL_LOW);
+    uapi_pin_set_mode(RELAY1_GPIO, HAL_PIO_FUNC_GPIO);
+    uapi_gpio_set_dir(RELAY1_GPIO, GPIO_DIRECTION_OUTPUT);
+    uapi_gpio_set_val(RELAY1_GPIO, GPIO_LEVEL_LOW);
+    uapi_pin_set_mode(RELAY2_GPIO, HAL_PIO_FUNC_GPIO);
+    uapi_gpio_set_dir(RELAY2_GPIO, GPIO_DIRECTION_OUTPUT);
+    uapi_gpio_set_val(RELAY2_GPIO, GPIO_LEVEL_LOW);
 }
 
 static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与上报功能
@@ -444,6 +449,7 @@ static void* Smart_Agriculture_Task(const char* arg)   //! 执行数据采集与
         osal_msleep(COLLECT_DATA_CNT * 1000);   // 这里设置采集周期，休眠时间执行softmesh
         memset(rec_buff, 0, 100);                                                    // 清零
         int len = uapi_uart_read(CONFIG_UART2_BUS_ID, rec_buff, 100, 0);             // 读取内容
+        osal_mdelay(200);
         if (len <= 0) {
             printf("串口未收到任何数据。\n");
             continue;

@@ -257,7 +257,8 @@ void NB_QMTOPEN(void){
 }
 
 void NB_QMTCONN(void){
-    unsigned char ATCommand0[] = "AT+QMTCONN=0,\"%s\",\"user\",\"Sztu1034\"\r\n";// 设置AT指令
+    unsigned char ATCommand0[60] = { 0 };
+    sprintf((char*)ATCommand0, "AT+QMTCONN=0,\"%s\",\"user\",\"Sztu1034\"\r\n", client_id);// 设置AT指令
     uapi_uart_write(CONFIG_UART2_BUS_ID, ATCommand0, sizeof(ATCommand0), 0);     // 串口发送指令
     printf("发送NB:\n%s\n",ATCommand0);                                          // 打印发送的内容
     osal_mdelay(2000);                                                            // 延时等待重启
