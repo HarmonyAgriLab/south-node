@@ -1,6 +1,6 @@
-# hi3863-nb-nomesh版本
+# hi3863-nb-heater版本
 
-该版本代码基于 Hi3863 搭配 NB 模组实现数据上报，节点通过 NB 模组直接接入公网，没有通过 mesh 网络进行内部的组网通信。
+该版本代码基于 Hi3863 搭配 NB 模组实现数据上报，可以在公网远程控制设备。
 
 ## 1 搭建环境
 
@@ -18,28 +18,28 @@ git clone git@github.com:HarmonyAgriLab/south-node.git
 
 ## 4 部署代码
 
-将 `environment/hi3863-nb-nomesh`文件夹复制到 `fbb_ws63/src/application/samples/`路径下。
+将 `environment/hi3863-nb-heater`文件夹复制到 `fbb_ws63/src/application/samples/`路径下。
 
-![image-20250416195508100](README.assets/image-20250416195508100.png)
+![image-20250521223031936](C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521223031936.png)
 
 在 `fbb_ws63/src/application/samples/CMakeLists.txt`文件末尾添加如下代码：
 
 ```cmake
-if(DEFINED CONFIG_ENABLE_HI3861_NB_NOMESH_SAMPLE)
-    add_subdirectory_if_exist(hi3863-nb-nomesh)
+if(DEFINED CONFIG_ENABLE_HI3861_NB_HEATER_SAMPLE)
+    add_subdirectory_if_exist(hi3863-nb-heater)
 endif()
 ```
 
 在 `fbb_ws63/src/application/samples/Kconfig`文件末尾添加如下代码：
 
 ```cmake
-config ENABLE_HI3861_NB_NOMESH_SAMPLE
+config ENABLE_HI3861_NB_HEATER_SAMPLE
     bool
-    prompt "Enable the Sample of hi3863-nb-nomesh."
+    prompt "Enable the Sample of hi3863-nb-heater."
     default n
     depends on SAMPLE_ENABLE
     help
-        This option means enable the sample of hi3863-nb-nomesh.
+        This option means enable the sample of hi3863-nb-heater.
 ```
 
 在 `fbb_ws63/src`路径下执行如下命令，启动 Menuconfig 程序：
@@ -50,7 +50,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 
 选择需要编译的 `HI3861_NB_MESH`目标，勾选并保存退出：
 
-![image-20250416203535319](README.assets/image-20250416203535319.png)
+![image-20250521222944453](C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521222944453.png)
 
 在 `fbb_ws63/src`路径下执行如下命令，启动编译：
 
@@ -58,7 +58,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 python3 build.py ws63-liteos-app
 ```
 
-![image-20250416200439735](README.assets/image-20250416200439735.png)
+![image-20250521223054461](C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521223054461.png)
 
 ## 5 硬件接线
 
@@ -66,25 +66,21 @@ python3 build.py ws63-liteos-app
 
 ### 引脚分配
 
-| GPIO引脚 | 复用功能      | 用途            |
-| -------- | ------------- | --------------- |
-| GPIO_17  | UART0_TXD     | 烧录和debug串口 |
-| GPIO_18  | UART0_RXD     | 烧录和debug串口 |
-| GPIO_15  | I2C_SCL       | AHT20           |
-| GPIO_16  | I2C_SDA       | AHT20           |
-| GPIO_07  | UART2_RXD     | NB模组          |
-| GPIO_08  | UART2_TXD     | NB模组          |
-| GPIO_11  | SOFT_UART_TXD | 土壤传感器      |
-| GPIO_12  | SOFT_UART_RXD | 土壤传感器      |
+| GPIO引脚 | 复用功能  | 用途            |
+| -------- | --------- | --------------- |
+| GPIO_17  | UART0_TXD | 烧录和debug串口 |
+| GPIO_18  | UART0_RXD | 烧录和debug串口 |
+| GPIO_15  | GPIO      | 触发继电器      |
+| GPIO_16  | GPIO      | 触发继电器      |
+| GPIO_07  | UART2_RXD | NB模组          |
+| GPIO_08  | UART2_TXD | NB模组          |
 
 ### 供电要求
 
-| 设备           | 电压    | 是否需要接地 |
-| -------------- | ------- | ------------ |
-| AHT20          | 3.3/5 V | 需要         |
-| 土壤传感器     | 5 V     | 需要         |
-| TTL485转换模块 | 3.3 V   | 需要         |
-| NB模组         | 5 V     | 需要         |
+| 设备       | 电压 | 是否需要接地 |
+| ---------- | ---- | ------------ |
+| 触发继电器 | 5 V  | 需要         |
+| NB模组     | 5 V  | 需要         |
 
 ## 6 烧录程序
 
