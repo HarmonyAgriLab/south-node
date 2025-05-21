@@ -20,7 +20,7 @@ git clone git@github.com:HarmonyAgriLab/south-node.git
 
 将 `environment/hi3863-nb-curtain`文件夹复制到 `fbb_ws63/src/application/samples/`路径下。
 
-![image-20250416195508100](README.assets/image-20250416195508100.png)
+<img src="README.assets/image-20250522000451827.png" alt="image-20250522000451827" style="zoom:80%;" />
 
 在 `fbb_ws63/src/application/samples/CMakeLists.txt`文件末尾添加如下代码：
 
@@ -50,7 +50,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 
 选择需要编译的 `HI3861_NB_MESH`目标，勾选并保存退出：
 
-![image-20250416203535319](README.assets/image-20250416203535319.png)
+![image-20250522000649462](README.assets\image-20250522000649462.png)
 
 在 `fbb_ws63/src`路径下执行如下命令，启动编译：
 
@@ -58,7 +58,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 python3 build.py ws63-liteos-app
 ```
 
-![image-20250416200439735](README.assets/image-20250416200439735.png)
+![image-20250522000818213](README.assets\image-20250522000818213.png)
 
 ## 5 硬件接线
 

@@ -20,7 +20,7 @@ git clone git@github.com:HarmonyAgriLab/south-node.git
 
 将 `environment/hi3863-nb-ceiling`文件夹复制到 `fbb_ws63/src/application/samples/`路径下。
 
-![image-20250521215005515](C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521215005515.png)
+<img src="README.assets/\image-20250521215005515.png" alt="image-20250521215005515" style="zoom:80%;" />
 
 在 `fbb_ws63/src/application/samples/CMakeLists.txt`文件末尾添加如下代码：
 
@@ -50,7 +50,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 
 选择需要编译的 `HI3861_NB_MESH`目标，勾选并保存退出：
 
-![image-20250521222509757](C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521222509757.png)
+![image-20250521222509757](README.assets/\image-20250521222509757.png)
 
 在 `fbb_ws63/src`路径下执行如下命令，启动编译：
 
@@ -58,7 +58,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 python3 build.py ws63-liteos-app
 ```
 
-<img src="C:\Users\WiBeeBaBu\AppData\Roaming\Typora\typora-user-images\image-20250521220222014.png" alt="image-20250521220222014" style="zoom:150%;" />
+![image-20250521235800911](README.assets/image-20250521235800911.png)
 
 ## 5 硬件接线
 
