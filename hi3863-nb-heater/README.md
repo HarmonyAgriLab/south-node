@@ -50,7 +50,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 
 选择需要编译的 `HI3861_NB_MESH`目标，勾选并保存退出：
 
-![image-20250521222944453](README.assets\image-20250521222944453.png)
+![image-20250521222944453](README.assets/image-20250521222944453.png)
 
 在 `fbb_ws63/src`路径下执行如下命令，启动编译：
 
@@ -58,7 +58,7 @@ python3 build.py -c ws63-liteos-app menuconfig
 python3 build.py ws63-liteos-app
 ```
 
-![image-20250521223054461](README.assets\image-20250521223054461.png)
+![image-20250521223054461](README.assets/image-20250521223054461.png)
 
 ## 5 硬件接线
 
