@@ -286,7 +286,7 @@ void NB_Init(void)   //! NB初始化
         return;
 
     // 配置NB模块的DNS服务器
-    unsigned char ATCommand1[] = "Send AT+QIDNSCFG=\"8.8.8.8\",\"8.8.4.4\"\r\n";
+    unsigned char ATCommand1[] = "AT+QIDNSCFG=\"8.8.8.8\",\"8.8.4.4\"\r\n";
     uapi_uart_write(CONFIG_UART2_BUS_ID, ATCommand1, sizeof(ATCommand1), 0);
     osal_mdelay(500);
 
